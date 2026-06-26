@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+
 
 export const metadata: Metadata = {
   title: "FlashMind",
@@ -12,10 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="dark">
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className="dark">
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

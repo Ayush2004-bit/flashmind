@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
@@ -8,10 +9,11 @@ export default function Navbar() {
       <div className="hidden md:flex gap-6">
         <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
-        
       </div>
 
-      <Button>Sign In</Button>
+      <Link href="/sign-in">
+        <Button>Sign In</Button>
+      </Link>
     </nav>
   );
 }

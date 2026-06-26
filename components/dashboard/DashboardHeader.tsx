@@ -1,3 +1,5 @@
+import { UserButton } from "@clerk/nextjs";
+
 export default function DashboardHeader() {
   return (
     <header className="border-b border-zinc-800">
@@ -6,9 +8,7 @@ export default function DashboardHeader() {
           FlashMind
         </h2>
 
-        <button className="border border-zinc-700 px-4 py-2 rounded-lg">
-          Profile
-        </button>
+        <UserButton />
       </div>
     </header>
   );

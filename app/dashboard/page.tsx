@@ -1,10 +1,19 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import UploadCards from "@/components/dashboard/UploadCards";
 import TopicGenerator from "@/components/dashboard/TopicGenerator";
 import RecentSets from "@/components/dashboard/RecentSets";
 import { BrainCircuit } from "lucide-react";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+const { userId } = await auth();
+
+if (!userId) {
+    redirect("/sign-in");
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
       <DashboardHeader />
