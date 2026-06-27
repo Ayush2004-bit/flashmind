@@ -1,3 +1,5 @@
+"use client";
+
 import { UserButton } from "@clerk/nextjs";
 
 export default function DashboardHeader() {
@@ -8,7 +10,13 @@ export default function DashboardHeader() {
           FlashMind
         </h2>
 
-        <UserButton />
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: "w-10 h-10",
+            },
+          }}
+        />
       </div>
     </header>
   );
