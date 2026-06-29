@@ -29,6 +29,7 @@ export default function TopicGenerator() {
       });
 
       const data = await response.json();
+      console.log(data);
 
       sessionStorage.setItem("flashcards", data.flashcards);
 

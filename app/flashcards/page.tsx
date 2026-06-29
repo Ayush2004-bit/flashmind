@@ -1,8 +1,10 @@
 "use client";
 
+import FlashCard from "@/components/flashcards/flashcard";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type Flashcard = {
   question: string;
@@ -15,6 +17,10 @@ export default function FlashcardsPage() {
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [flippedCard, setFlippedCard] = useState<number | null>(null);
+  const [reviewedCards, setReviewedCards] = useState<number[]>([]);
+
+
+
 
   useEffect(() => {
     const data = sessionStorage.getItem("flashcards");
@@ -28,32 +34,39 @@ export default function FlashcardsPage() {
     }
   }, []);
 
+  const progress =
+    flashcards.length === 0
+      ? 0
+      : Math.round((reviewedCards.length / flashcards.length) * 100);
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-purple-950 text-white">
-
       <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="mb-12">
 
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: .6 }}
-          className="mb-12"
-        >
-
-          <h1 className="text-5xl font-bold">
-            AI Flashcards
-          </h1>
+          <div className="mb-6">
+  <Link
+    href="/dashboard"
+    className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-purple-500 hover:text-white"
+  >
+    <ArrowLeft size={18} />
+    Back to Dashboard
+  </Link>
+</div>
+          <h1 className="text-5xl font-bold">AI Flashcards</h1>
 
           <p className="text-zinc-400 mt-4 text-lg">
             Learn anything faster with interactive AI generated flashcards.
           </p>
+        </div>
 
-        </motion.div>
+        
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-
+        {/* Info Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {/* Topic */}
           <div className="rounded-3xl border border-zinc-800 bg-white/5 backdrop-blur-xl p-8">
-
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
               Topic
             </p>
@@ -61,11 +74,10 @@ export default function FlashcardsPage() {
             <h2 className="text-3xl font-bold mt-3 capitalize text-purple-400">
               {topic}
             </h2>
-
           </div>
 
+          {/* Total Cards */}
           <div className="rounded-3xl border border-zinc-800 bg-white/5 backdrop-blur-xl p-8">
-
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
               Total Cards
             </p>
@@ -73,144 +85,55 @@ export default function FlashcardsPage() {
             <h2 className="text-3xl font-bold mt-3">
               {flashcards.length}
             </h2>
-
           </div>
 
-        </div>
+          {/* Progress */}
+          <div className="rounded-3xl border border-zinc-800 bg-white/5 backdrop-blur-xl p-8">
+            <p className="uppercase tracking-widest text-zinc-400 text-sm">
+              Study Progress
+            </p>
 
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-
-          {flashcards.map((card, index) => (
-
-            <div
-              key={index}
-              style={{ perspective: 1200 }}
-            >
-
-              <motion.div
-
-                animate={{
-                  rotateY: flippedCard === index ? 180 : 0
-                }}
-
-                transition={{
-                  duration: .7,
-                  type: "spring"
-                }}
-
-                onClick={() =>
-                  setFlippedCard(
-                    flippedCard === index
-                      ? null
-                      : index
-                  )
-                }
-
+            <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-purple-500 transition-all duration-500"
                 style={{
-                  transformStyle: "preserve-3d",
-                  position: "relative"
+                  width: `${progress}%`,
                 }}
-
-                className="cursor-pointer h-72 w-full"
-
-              >
-
-                {/* FRONT */}
-
-                <div
-
-                  style={{
-                    backfaceVisibility: "hidden",
-                    position: "absolute",
-                    inset: 0
-                  }}
-
-                  className="rounded-3xl
-                  bg-gradient-to-br
-                  from-zinc-900
-                  to-zinc-800
-                  border
-                  border-zinc-700
-                  p-8
-                  flex
-                  flex-col
-                  justify-between
-                  shadow-2xl
-                  hover:border-purple-500
-                  transition-all"
-
-                >
-
-                  <div>
-
-                    <span className="text-xs uppercase tracking-widest text-zinc-400">
-
-                      Question
-
-                    </span>
-
-                    <h3 className="text-2xl font-bold mt-6 leading-relaxed text-purple-300">
-
-                      {card.question}
-
-                    </h3>
-
-                  </div>
-
-                  <div className="text-zinc-500 text-sm">
-
-                    Click to reveal answer
-
-                  </div>
-
-                </div>
-                                {/* BACK */}
-
-                <div
-                  style={{
-                    backfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                    position: "absolute",
-                    inset: 0,
-                  }}
-                  className="rounded-3xl
-                  bg-gradient-to-br
-                  from-purple-700
-                  via-purple-800
-                  to-purple-950
-                  border
-                  border-purple-400
-                  p-8
-                  flex
-                  flex-col
-                  justify-between
-                  shadow-2xl"
-                >
-                  <div>
-                    <span className="text-xs uppercase tracking-widest text-purple-200">
-                      Answer
-                    </span>
-
-                    <p className="text-xl leading-relaxed mt-6 font-medium">
-                      {card.answer}
-                    </p>
-                  </div>
-
-                  <div className="text-purple-200 text-sm">
-                    Click to view question
-                  </div>
-                </div>
-
-              </motion.div>
-
+              />
             </div>
 
-          ))}
+            <h2 className="text-2xl font-bold mt-5">
+              {reviewedCards.length} / {flashcards.length}
+            </h2>
 
+            <p className="text-zinc-400 mt-2">
+              {progress}% Complete
+            </p>
+          </div>
         </div>
 
-      </div>
+        {/* Flashcards */}
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {flashcards.map((card, index) => (
+            <FlashCard
+              key={index}
+              question={card.question}
+              answer={card.answer}
+              flipped={flippedCard === index}
+              reviewed={reviewedCards.includes(index)}
+              onFlip={() => {
+                setFlippedCard(
+                  flippedCard === index ? null : index
+                );
 
+                if (!reviewedCards.includes(index)) {
+                  setReviewedCards((prev) => [...prev, index]);
+                }
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </main>
   );
 }
