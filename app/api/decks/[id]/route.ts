@@ -95,3 +95,62 @@ export async function DELETE(
     );
   }
 }
+
+
+/* ===========================
+   RENAME DECK
+=========================== */
+
+export async function PATCH(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+
+    const { title } = await req.json();
+
+    if (!title || title.trim() === "") {
+      return NextResponse.json(
+        { error: "Title is required" },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseServer
+      .from("flash_decks")
+      .update({
+        title: title.trim(),
+      })
+      .eq("id", id)
+      .eq("user_id", userId)
+      .select()
+      .single();
+
+    if (error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(data);
+
+  } catch (err) {
+    console.error(err);
+
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
