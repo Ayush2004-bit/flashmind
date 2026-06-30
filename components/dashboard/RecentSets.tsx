@@ -8,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import DeleteDeckButton from "./DeleteDeckButton";
+import RenameDeckButton from "./RenameDeckButton";
 
 type Deck = {
   id: string;
@@ -110,12 +111,25 @@ export default function RecentSets() {
               </Link>
 
               <div className="flex items-center justify-between mt-6">
-                <span className="text-sm text-zinc-400">
-                  {deck.flashcards.length} Cards
-                </span>
 
-                <DeleteDeckButton deckId={deck.id} />
-              </div>
+  <span className="text-sm text-zinc-400">
+    {deck.flashcards.length} Cards
+  </span>
+
+  <div className="flex items-center gap-2">
+
+    <RenameDeckButton
+      deckId={deck.id}
+      currentTitle={deck.title}
+    />
+
+    <DeleteDeckButton
+      deckId={deck.id}
+    />
+
+  </div>
+
+</div>
             </div>
           ))}
         </div>
