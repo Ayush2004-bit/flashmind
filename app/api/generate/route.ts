@@ -4,8 +4,10 @@ import { generateFlashcards } from "@/services/ai.service";
 export async function POST(req: Request) {
   try {
     // Request body se topic nikaalna
-    const { topic } = await req.json();
+    const { topic, count } = await req.json();
+
 console.log("Received Topic:", topic);
+console.log("Flashcard Count:", count);
     
     if (!topic) {
       return NextResponse.json(
@@ -15,7 +17,7 @@ console.log("Received Topic:", topic);
     }
 
     // Gemini se flashcards generate karna
-    const flashcards = await generateFlashcards(topic);
+    const flashcards = await generateFlashcards(topic, count);
 console.log("Flashcards from service:", flashcards);
 
 
