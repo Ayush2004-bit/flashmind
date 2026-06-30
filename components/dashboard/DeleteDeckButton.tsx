@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { toast } from "sonner";
 
 type DeleteDeckButtonProps = {
   deckId: string;
@@ -29,14 +30,17 @@ export default function DeleteDeckButton({
         throw new Error("Failed to delete deck");
       }
 
-      setOpen(false);
+     setOpen(false);
 
-      router.refresh();
+toast.success("Deck deleted successfully!");
 
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete deck.");
-    } finally {
+window.location.reload();
+
+} catch (err) {
+  console.error(err);
+
+  toast.error("Failed to delete deck.");
+} finally {
       setLoading(false);
     }
   };

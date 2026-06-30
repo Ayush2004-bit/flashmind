@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,8 +8,10 @@ import {
   CalendarDays,
   ChevronRight,
 } from "lucide-react";
+
 import DeleteDeckButton from "./DeleteDeckButton";
 import RenameDeckButton from "./RenameDeckButton";
+import SearchDeck from "./SearchDeck";
 
 type Deck = {
   id: string;
@@ -24,6 +27,8 @@ type Deck = {
 export default function RecentSets() {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchDecks = async () => {
@@ -47,6 +52,15 @@ export default function RecentSets() {
     fetchDecks();
   }, []);
 
+  const filteredDecks = decks.filter((deck) => {
+    const keyword = search.toLowerCase();
+
+    return (
+      deck.title.toLowerCase().includes(keyword) ||
+      deck.topic.toLowerCase().includes(keyword)
+    );
+  });
+
   return (
     <section className="mt-16">
       <div className="flex items-center justify-between mb-6">
@@ -61,25 +75,32 @@ export default function RecentSets() {
         )}
       </div>
 
+      {/* SEARCH BAR */}
+
+      <SearchDeck
+        value={search}
+        onChange={setSearch}
+      />
+
       {loading ? (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
           <p className="text-zinc-400">
             Loading decks...
           </p>
         </div>
-      ) : decks.length === 0 ? (
+      ) : filteredDecks.length === 0 ? (
         <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-8 text-center">
           <h3 className="text-lg font-semibold">
-            No Saved Decks
+            No Matching Decks
           </h3>
 
           <p className="text-zinc-400 mt-2">
-            Generate and save your first flashcard deck.
+            Try another keyword.
           </p>
         </div>
       ) : (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {decks.map((deck) => (
+          {filteredDecks.map((deck) => (
             <div
               key={deck.id}
               className="rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 hover:border-purple-500 transition-all"
@@ -104,6 +125,7 @@ export default function RecentSets() {
 
                 <div className="flex items-center gap-2 mt-4 text-sm text-zinc-500">
                   <CalendarDays size={15} />
+
                   {new Date(
                     deck.created_at
                   ).toLocaleDateString()}
@@ -111,25 +133,21 @@ export default function RecentSets() {
               </Link>
 
               <div className="flex items-center justify-between mt-6">
+                <span className="text-sm text-zinc-400">
+                  {deck.flashcards.length} Cards
+                </span>
 
-  <span className="text-sm text-zinc-400">
-    {deck.flashcards.length} Cards
-  </span>
+                <div className="flex items-center gap-2">
+                  <RenameDeckButton
+                    deckId={deck.id}
+                    currentTitle={deck.title}
+                  />
 
-  <div className="flex items-center gap-2">
-
-    <RenameDeckButton
-      deckId={deck.id}
-      currentTitle={deck.title}
-    />
-
-    <DeleteDeckButton
-      deckId={deck.id}
-    />
-
-  </div>
-
-</div>
+                  <DeleteDeckButton
+                    deckId={deck.id}
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>

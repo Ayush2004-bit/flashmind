@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import RenameDeckDialog from "./RenameDeckDialog";
+import { toast } from "sonner";
 
 type RenameDeckButtonProps = {
   deckId: string;
@@ -54,14 +55,14 @@ export default function RenameDeckButton({
       }
 
       console.log("Rename Successful");
-
+      toast.success("Deck renamed successfully!");
       setOpen(false);
 
       window.location.reload();
 
     } catch (err) {
       console.error("Rename Error:", err);
-      alert("Failed to rename deck.");
+      toast.error("Failed to rename deck.");
     } finally {
       setLoading(false);
       console.log("========== RENAME END ==========");

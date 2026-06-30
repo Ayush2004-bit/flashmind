@@ -1,7 +1,10 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 
+import { ClerkProvider } from "@clerk/nextjs";
+import ThemeProvider from "@/components/providers/ThemeProvider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "FlashMind",
@@ -15,11 +18,23 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className="dark">
-          {children}
+      <html lang="en" suppressHydrationWarning>
+        <body>
+          <ThemeProvider>
+
+            {children}
+
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              duration={2500}
+            />
+
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>
   );
 }
+
