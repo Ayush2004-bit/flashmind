@@ -19,7 +19,7 @@ export default function FlashCard({
 }: FlashCardProps) {
   return (
     <div
-      className="w-full h-52"
+      className="w-full h-56"
       style={{ perspective: "1200px" }}
       onClick={onFlip}
     >
@@ -39,32 +39,38 @@ export default function FlashCard({
 
         <div
           className={`absolute inset-0 rounded-3xl
-border
-${reviewed ? "border-green-500" : "border-zinc-800"}
-bg-zinc-900/70
-backdrop-blur-xl
-p-8
-flex flex-col justify-between
-hover:border-purple-500
-transition-all`}
+          ${
+            reviewed ? "border-green-500" : "border-zinc-800"
+          }
+          border
+          bg-zinc-900/70
+          backdrop-blur-xl
+          p-6
+          transition-all
+          hover:border-purple-500
+          hover:-translate-y-2
+          hover:shadow-2xl
+          hover:shadow-purple-500/20`}
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
           }}
         >
-          <div>
+          <div className="relative h-full">
             <p className="uppercase text-xs tracking-widest text-zinc-400">
               Question
             </p>
 
-            <h2 className="mt-6 text-2xl font-bold text-purple-400 leading-relaxed">
-              {question}
-            </h2>
-          </div>
+            <div className="flex items-center justify-center h-[70%]">
+              <h2 className="text-2xl font-bold text-purple-400 text-center leading-relaxed">
+                {question}
+              </h2>
+            </div>
 
-          <p className="text-sm text-zinc-500">
-            Click to reveal answer
-          </p>
+            <p className="absolute bottom-0 text-sm text-zinc-500">
+              Click to reveal answer
+            </p>
+          </div>
         </div>
 
         {/* BACK */}
@@ -76,7 +82,7 @@ transition-all`}
           from-purple-700
           via-purple-800
           to-purple-950
-          p-8
+          p-6
           flex flex-col justify-between"
           style={{
             transform: "rotateY(180deg)",
@@ -89,9 +95,11 @@ transition-all`}
               Answer
             </p>
 
-            <h2 className="mt-6 text-xl leading-relaxed font-medium">
-              {answer}
-            </h2>
+            <div className="flex items-center justify-center h-[70%]">
+              <h2 className="text-lg leading-relaxed font-medium text-center">
+                {answer}
+              </h2>
+            </div>
           </div>
 
           <p className="text-sm text-purple-200">

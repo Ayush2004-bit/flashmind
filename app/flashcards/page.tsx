@@ -2,9 +2,9 @@
 
 import FlashCard from "@/components/flashcards/flashcard";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 
 type Flashcard = {
   question: string;
@@ -18,6 +18,8 @@ export default function FlashcardsPage() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [flippedCard, setFlippedCard] = useState<number | null>(null);
   const [reviewedCards, setReviewedCards] = useState<number[]>([]);
+  const router = useRouter();
+const [saving, setSaving] = useState(false);
 
 
 
@@ -34,6 +36,40 @@ export default function FlashcardsPage() {
     }
   }, []);
 
+const handleSaveDeck = async () => {
+  try {
+    setSaving(true);
+
+    const response = await fetch("/api/decks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: topic || "Untitled Deck",
+        topic: topic || "General",
+        flashcards,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Failed to save deck");
+    }
+
+    alert("🎉 Deck saved successfully!");
+
+    router.push("/dashboard");
+  } catch (error) {
+    console.error(error);
+    alert("❌ Failed to save deck");
+  } finally {
+    setSaving(false);
+  }
+};
+
+
   const progress =
     flashcards.length === 0
       ? 0
@@ -45,14 +81,32 @@ export default function FlashcardsPage() {
         {/* Header */}
         <div className="mb-12">
 
-          <div className="mb-6">
+          <div className="mb-8 flex items-center justify-between">
   <Link
     href="/dashboard"
-    className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-purple-500 hover:text-white"
+    className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2 text-sm font-medium text-zinc-300 transition-all hover:border-purple-500 hover:bg-zinc-800 hover:text-white"
   >
     <ArrowLeft size={18} />
     Back to Dashboard
   </Link>
+
+  <button
+    onClick={handleSaveDeck}
+    disabled={saving || flashcards.length === 0}
+    className="group inline-flex items-center gap-3 rounded-xl
+    bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-600
+    px-6 py-3 font-semibold shadow-lg shadow-purple-900/30
+    transition-all duration-300
+    hover:scale-105 hover:shadow-purple-700/50
+    disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    <Save
+      size={18}
+      className="transition-transform duration-300 group-hover:rotate-12"
+    />
+
+    {saving ? "Saving..." : "Save Deck"}
+  </button>
 </div>
           <h1 className="text-5xl font-bold">AI Flashcards</h1>
 
@@ -64,7 +118,7 @@ export default function FlashcardsPage() {
         
 
         {/* Info Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
           {/* Topic */}
           <div className="rounded-3xl border border-zinc-800 bg-white/5 backdrop-blur-xl p-8">
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
@@ -112,8 +166,14 @@ export default function FlashcardsPage() {
           </div>
         </div>
 
+
+ 
+</div>
+
+
+
         {/* Flashcards */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {flashcards.map((card, index) => (
             <FlashCard
               key={index}
@@ -133,7 +193,7 @@ export default function FlashcardsPage() {
             />
           ))}
         </div>
-      </div>
+      
     </main>
   );
 }
