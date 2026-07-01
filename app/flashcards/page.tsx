@@ -20,21 +20,30 @@ export default function FlashcardsPage() {
   const [reviewedCards, setReviewedCards] = useState<number[]>([]);
   const router = useRouter();
 const [saving, setSaving] = useState(false);
+const [deckTitle, setDeckTitle] = useState("");
 
 
 
 
   useEffect(() => {
-    const data = sessionStorage.getItem("flashcards");
+  const data = sessionStorage.getItem("flashcards");
 
-    if (!data) return;
+  if (!data) return;
 
-    try {
-      setFlashcards(JSON.parse(data));
-    } catch (err) {
-      console.error(err);
+  try {
+    setFlashcards(JSON.parse(data));
+
+    const savedTitle = sessionStorage.getItem("deckTitle");
+
+    if (savedTitle) {
+      setDeckTitle(savedTitle);
+    } else if (topic) {
+      setDeckTitle(topic);
     }
-  }, []);
+  } catch (err) {
+    console.error(err);
+  }
+}, [topic]);
 
 const handleSaveDeck = async () => {
   try {
@@ -46,8 +55,8 @@ const handleSaveDeck = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        title: topic || "Untitled Deck",
-        topic: topic || "General",
+        title: deckTitle || "Untitled Deck",
+topic: deckTitle || "General",
         flashcards,
       }),
     });
@@ -126,7 +135,7 @@ const handleSaveDeck = async () => {
             </p>
 
             <h2 className="text-3xl font-bold mt-3 capitalize text-purple-400">
-              {topic}
+              {deckTitle}
             </h2>
           </div>
 

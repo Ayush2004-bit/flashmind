@@ -7,26 +7,19 @@ const ai = new GoogleGenAI({
 
 export default ai;
 
-export async function generateFlashcards(
-  topic: string,
-  count: number = 10
-) {
+/* ===========================
+   Generate Flashcards from Topic
+=========================== */
+
+export async function generateFlashcards(topic: string) {
   console.log("Prompt Topic:", topic);
-  console.log("Flashcard Count:", count);
 
   const prompt = `
 You are an expert teacher.
 
-Generate exactly ${count} high-quality flashcards about "${topic}".
+Generate exactly 10 flashcards about "${topic}".
 
-Rules:
-
-- Generate exactly ${count} flashcards.
-- Every question should be unique.
-- Keep questions concise.
-- Keep answers short and easy to understand.
-- Cover different concepts of the topic.
-- Return ONLY valid JSON.
+Return ONLY valid JSON.
 
 Format:
 
@@ -38,14 +31,8 @@ Format:
 ]
 
 Do not use markdown.
-
-Do not write \`\`\`json.
-
-Do not add explanations.
-
-Do not add extra text.
-
-Only return JSON.
+Do not add explanation.
+Do not write anything except JSON.
 `;
 
   const response = await ai.models.generateContent({
@@ -59,3 +46,44 @@ Only return JSON.
   return response.text;
 }
 
+/* ===========================
+   Generate Flashcards from PDF Text
+=========================== */
+
+
+
+export async function generateFlashcardsFromText(
+  text: string
+) {
+  const prompt = `
+You are an expert teacher.
+
+Read the following study material and generate exactly 10 flashcards.
+
+Study Material:
+
+${text.slice(0, 12000)}
+
+Return ONLY valid JSON.
+
+Format:
+
+[
+  {
+    "question":"...",
+    "answer":"..."
+  }
+]
+
+No markdown.
+No explanation.
+Only JSON.
+`;
+
+  const response = await ai.models.generateContent({
+    model: process.env.GEMINI_MODEL!,
+    contents: prompt,
+  });
+
+  return response.text;
+}
