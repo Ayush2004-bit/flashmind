@@ -19,12 +19,12 @@ export default function UploadCards() {
       href: "/dashboard/youtube",
     },
     {
-      title: "Paste Notes",
-      description:
-        "Paste your class notes and instantly create revision flashcards.",
-      icon: NotebookPen,
-      href: "#",
-    },
+  title: "Paste Notes",
+  description:
+    "Paste your class notes and instantly create revision flashcards.",
+  icon: NotebookPen,
+  href: "/dashboard/notes",
+},
   ];
 
   return (
