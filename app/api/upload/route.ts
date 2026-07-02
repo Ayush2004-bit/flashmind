@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Extract text
+    // Extract text from PDF
     const extractedText = await extractPDFText(buffer);
 
     if (!extractedText.trim()) {
@@ -29,19 +29,20 @@ export async function POST(req: Request) {
     }
 
     // Generate flashcards
-    const flashcards =
-      await generateFlashcardsFromText(extractedText);
+    const flashcards = await generateFlashcardsFromText(extractedText);
 
     return NextResponse.json({
       success: true,
       flashcards,
+      deckTitle: file.name.replace(".pdf", ""),
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("PDF Upload Error:", err);
 
     return NextResponse.json(
       {
+        success: false,
         error: "PDF Flashcard Generation Failed",
       },
       {

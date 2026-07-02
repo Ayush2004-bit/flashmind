@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 export default function YouTubeUploader() {
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
 
   const handleGenerate = async () => {
@@ -16,41 +17,73 @@ export default function YouTubeUploader() {
       return;
     }
 
-    // Basic YouTube URL validation
-    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+/;
+    // Validate YouTube URL
+    const youtubeRegex =
+      /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+/;
+
     if (!youtubeRegex.test(url)) {
       toast.error("Invalid YouTube URL!");
       return;
     }
 
-    setIsLoading(true);
-    const toastId = toast.loading("Extracting transcript...");
-
     try {
+      setIsLoading(true);
+
+      const toastId = toast.loading(
+        "Generating flashcards..."
+      );
+
       const response = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ youtubeUrl: url, count: 10 }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          youtubeUrl: url,
+          count: 10,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        toast.error(
+          data.error || "Failed to generate flashcards",
+          { id: toastId }
+        );
+        return;
       }
 
-      toast.success("Flashcards generated!", { id: toastId });
-
-      // Flashcards page pe bhejo
-      sessionStorage.setItem("flashcards", JSON.stringify(data.flashcards));
+      // Save flashcards
       sessionStorage.setItem(
-  "deckTitle",
-  data.videoTitle
-);
-      router.push("/flashcards");
+        "flashcards",
+        JSON.stringify(data.flashcards)
+      );
 
-    } catch (error: any) {
-      toast.error(error.message || "Failed to generate!", { id: toastId });
+      // Save title
+      sessionStorage.setItem(
+        "deckTitle",
+        data.deckTitle
+      );
+
+      // Save source
+      sessionStorage.setItem(
+        "source",
+        "youtube"
+      );
+
+      toast.success(
+        "Flashcards generated successfully!",
+        {
+          id: toastId,
+        }
+      );
+
+      router.push("/flashcards");
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +114,10 @@ export default function YouTubeUploader() {
       >
         {isLoading ? (
           <>
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2
+              size={18}
+              className="animate-spin"
+            />
             Generating...
           </>
         ) : (

@@ -24,42 +24,33 @@ export default function FlashcardsPage() {
 
   useEffect(() => {
   const data = sessionStorage.getItem("flashcards");
-
-  if (!data) {
-    console.error("No flashcards found");
-    return;
-  }
+  if (!data) return;
 
   try {
-    let parsed = JSON.parse(data);
-
-    // Agar parsed khud ek string hai to dubara parse karo
-    if (typeof parsed === "string") {
-      parsed = JSON.parse(parsed);
+    // Pehle check karo valid JSON hai ya nahi
+    let parsed = data;
+    
+    // Agar string hai toh parse karo
+    if (typeof data === "string") {
+      parsed = JSON.parse(data);
     }
 
+    // Array hai toh seedha set karo
     if (Array.isArray(parsed)) {
       setFlashcards(parsed);
-    } else if (
-      parsed &&
-      Array.isArray(parsed.flashcards)
-    ) {
-      setFlashcards(parsed.flashcards);
     } else {
-      console.error("Invalid flashcards format:", parsed);
+      console.error("Not an array:", parsed);
       setFlashcards([]);
     }
 
     const savedTitle = sessionStorage.getItem("deckTitle");
-
     if (savedTitle) {
       setDeckTitle(savedTitle);
     } else if (topic) {
       setDeckTitle(topic);
     }
-
   } catch (err) {
-    console.error("Failed to parse flashcards:", err);
+    console.error("Parse error:", err);
     setFlashcards([]);
   }
 }, [topic]);

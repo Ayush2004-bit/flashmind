@@ -11,11 +11,13 @@ export async function POST(req: Request) {
     const { topic, count = 10, youtubeUrl } = await req.json();
 
     let finalTopic = topic;
-    let videoTitle = "";
+    let deckTitle = "Untitled";
 
-    // If YouTube URL is provided
+    // ===========================
+    // YouTube Flashcards
+    // ===========================
     if (youtubeUrl) {
-      console.log("YouTube URL received:", youtubeUrl);
+      console.log("YouTube URL:", youtubeUrl);
 
       const videoId = extractVideoId(youtubeUrl);
 
@@ -26,19 +28,26 @@ export async function POST(req: Request) {
         );
       }
 
-      // Fetch transcript
       const transcript = await getTranscript(videoId);
-
-      // Fetch actual video title
-      videoTitle = await getVideoTitle(videoId);
+      deckTitle = await getVideoTitle(videoId);
 
       finalTopic = `
 Generate flashcards from the following YouTube transcript.
 
-Transcript:
-
 ${transcript}
 `;
+    }
+
+    // ===========================
+    // Notes / Topic Generator
+    // ===========================
+    if (!youtubeUrl && topic) {
+      deckTitle =
+        topic
+          .split("\n")
+          .find((line: string) => line.trim().length > 0)
+          ?.trim()
+          .substring(0, 50) || "Class Notes";
     }
 
     if (!finalTopic) {
@@ -52,13 +61,15 @@ ${transcript}
       );
     }
 
-    // Generate flashcards
-    const flashcards = await generateFlashcards(finalTopic, count);
+    const flashcards = await generateFlashcards(
+      finalTopic,
+      count
+    );
 
     return NextResponse.json({
       success: true,
       flashcards,
-      videoTitle,
+      deckTitle,
     });
 
   } catch (error) {

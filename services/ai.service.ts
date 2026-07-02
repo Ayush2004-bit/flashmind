@@ -21,6 +21,22 @@ function cleanJSON(text: string) {
    Generate Flashcards
 =========================== */
 
+function parseGeminiFlashcards(text: string) {
+  try {
+    const cleaned = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
+    return JSON.parse(cleaned);
+  } catch (error) {
+    console.error("Gemini JSON Parse Error:", error);
+    return [];
+  }
+}
+
+
+
 export async function generateFlashcards(
   topic: string,
   count: number = 10
@@ -63,6 +79,9 @@ Only JSON.
 /* ===========================
    PDF Flashcards
 =========================== */
+
+
+
 
 export async function generateFlashcardsFromText(
   text: string,

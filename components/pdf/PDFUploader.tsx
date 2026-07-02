@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useState } from "react";
@@ -19,17 +18,19 @@ export default function PDFUploader() {
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive } =
-    useDropzone({
-      accept: {
-        "application/pdf": [".pdf"],
-      },
-      multiple: false,
-      onDrop,
-    });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: {
+      "application/pdf": [".pdf"],
+    },
+    multiple: false,
+    onDrop,
+  });
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file) {
+      toast.error("Please select a PDF first.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -52,18 +53,24 @@ export default function PDFUploader() {
       // Save flashcards
       sessionStorage.setItem(
         "flashcards",
-        data.flashcards
+        JSON.stringify(data.flashcards)
       );
 
-      // Save PDF name as deck title
+      // Save deck title
       sessionStorage.setItem(
         "deckTitle",
-        file.name.replace(".pdf", "")
+        data.deckTitle
+      );
+
+      // Save source
+      sessionStorage.setItem(
+        "source",
+        "pdf"
       );
 
       toast.success("Flashcards generated successfully!");
 
-      router.push("/flashcards?source=pdf");
+      router.push("/flashcards");
     } catch (err) {
       console.error(err);
       toast.error("Something went wrong");
@@ -141,4 +148,3 @@ export default function PDFUploader() {
     </div>
   );
 }
-

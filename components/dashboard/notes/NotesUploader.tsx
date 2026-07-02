@@ -20,6 +20,10 @@ export default function NotesUploader() {
     try {
       setLoading(true);
 
+      const toastId = toast.loading(
+        "Generating flashcards..."
+      );
+
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
@@ -34,29 +38,42 @@ export default function NotesUploader() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || "Generation failed");
+        toast.error(
+          data.error || "Generation failed",
+          { id: toastId }
+        );
         return;
       }
 
+      // Save flashcards
       sessionStorage.setItem(
         "flashcards",
         JSON.stringify(data.flashcards)
       );
 
-     const title =
-  notes
-    .split("\n")
-    .find((line) => line.trim().length > 0)
-    ?.trim()
-    .substring(0, 50) || "Class Notes";
+      // Save title
+      sessionStorage.setItem(
+        "deckTitle",
+        data.deckTitle
+      );
 
-sessionStorage.setItem("deckTitle", title);
+      // Save source
+      sessionStorage.setItem(
+        "source",
+        "notes"
+      );
 
-      toast.success("Flashcards generated!");
+      toast.success(
+        "Flashcards generated successfully!",
+        {
+          id: toastId,
+        }
+      );
 
       router.push("/flashcards");
     } catch (err) {
       console.error(err);
+
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -65,7 +82,6 @@ sessionStorage.setItem("deckTitle", title);
 
   return (
     <div className="rounded-3xl border border-zinc-800 bg-zinc-900/60 p-8">
-
       <div className="flex items-center gap-3 mb-6">
         <NotebookPen
           size={30}
@@ -87,6 +103,7 @@ sessionStorage.setItem("deckTitle", title);
 
       <div className="flex justify-between mt-4 text-sm text-zinc-500">
         <span>{notes.length} characters</span>
+
         <span>
           AI will generate 10 flashcards
         </span>
@@ -109,7 +126,6 @@ sessionStorage.setItem("deckTitle", title);
           "Generate Flashcards"
         )}
       </button>
-
     </div>
   );
 }
