@@ -16,7 +16,7 @@ export default function UploadCards() {
       description:
         "Generate flashcards directly from educational YouTube videos.",
       icon: PlayCircle,
-      href: "#",
+      href: "/dashboard/youtube",
     },
     {
       title: "Paste Notes",

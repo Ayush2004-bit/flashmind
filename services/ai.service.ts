@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 const ai = new GoogleGenAI({
@@ -8,16 +7,30 @@ const ai = new GoogleGenAI({
 export default ai;
 
 /* ===========================
-   Generate Flashcards from Topic
+   Clean Gemini JSON
 =========================== */
 
-export async function generateFlashcards(topic: string) {
-  console.log("Prompt Topic:", topic);
+function cleanJSON(text: string) {
+  return text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+}
 
+/* ===========================
+   Generate Flashcards
+=========================== */
+
+export async function generateFlashcards(
+  topic: string,
+  count: number = 10
+) {
   const prompt = `
 You are an expert teacher.
 
-Generate exactly 10 flashcards about "${topic}".
+Generate exactly ${count} flashcards about:
+
+${topic}
 
 Return ONLY valid JSON.
 
@@ -25,14 +38,14 @@ Format:
 
 [
   {
-    "question": "...",
-    "answer": "..."
+    "question":"...",
+    "answer":"..."
   }
 ]
 
-Do not use markdown.
-Do not add explanation.
-Do not write anything except JSON.
+No markdown.
+No explanation.
+Only JSON.
 `;
 
   const response = await ai.models.generateContent({
@@ -40,25 +53,25 @@ Do not write anything except JSON.
     contents: prompt,
   });
 
-  console.log("Gemini Response:", response);
-  console.log("Response Text:", response.text);
+  const text = cleanJSON(response.text || "");
 
-  return response.text;
+  console.log(text);
+
+  return JSON.parse(text);
 }
 
 /* ===========================
-   Generate Flashcards from PDF Text
+   PDF Flashcards
 =========================== */
 
-
-
 export async function generateFlashcardsFromText(
-  text: string
+  text: string,
+  count: number = 10
 ) {
   const prompt = `
 You are an expert teacher.
 
-Read the following study material and generate exactly 10 flashcards.
+Read the following study material and generate exactly ${count} flashcards.
 
 Study Material:
 
@@ -85,5 +98,7 @@ Only JSON.
     contents: prompt,
   });
 
-  return response.text;
+  const cleaned = cleanJSON(response.text || "");
+
+  return JSON.parse(cleaned);
 }

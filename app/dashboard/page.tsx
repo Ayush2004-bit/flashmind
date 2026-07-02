@@ -7,6 +7,7 @@ import TopicGenerator from "@/components/dashboard/TopicGenerator";
 import RecentSets from "@/components/dashboard/RecentSets";
 import { BrainCircuit } from "lucide-react";
 
+
 export default async function DashboardPage() {
 const { userId } = await auth();
 

@@ -19,19 +19,36 @@ export default function FlashcardsPage() {
   const [flippedCard, setFlippedCard] = useState<number | null>(null);
   const [reviewedCards, setReviewedCards] = useState<number[]>([]);
   const router = useRouter();
-const [saving, setSaving] = useState(false);
-const [deckTitle, setDeckTitle] = useState("");
-
-
-
+  const [saving, setSaving] = useState(false);
+  const [deckTitle, setDeckTitle] = useState("");
 
   useEffect(() => {
   const data = sessionStorage.getItem("flashcards");
 
-  if (!data) return;
+  if (!data) {
+    console.error("No flashcards found");
+    return;
+  }
 
   try {
-    setFlashcards(JSON.parse(data));
+    let parsed = JSON.parse(data);
+
+    // Agar parsed khud ek string hai to dubara parse karo
+    if (typeof parsed === "string") {
+      parsed = JSON.parse(parsed);
+    }
+
+    if (Array.isArray(parsed)) {
+      setFlashcards(parsed);
+    } else if (
+      parsed &&
+      Array.isArray(parsed.flashcards)
+    ) {
+      setFlashcards(parsed.flashcards);
+    } else {
+      console.error("Invalid flashcards format:", parsed);
+      setFlashcards([]);
+    }
 
     const savedTitle = sessionStorage.getItem("deckTitle");
 
@@ -40,44 +57,38 @@ const [deckTitle, setDeckTitle] = useState("");
     } else if (topic) {
       setDeckTitle(topic);
     }
+
   } catch (err) {
-    console.error(err);
+    console.error("Failed to parse flashcards:", err);
+    setFlashcards([]);
   }
 }, [topic]);
 
-const handleSaveDeck = async () => {
-  try {
-    setSaving(true);
-
-    const response = await fetch("/api/decks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: deckTitle || "Untitled Deck",
-topic: deckTitle || "General",
-        flashcards,
-      }),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.error || "Failed to save deck");
+  const handleSaveDeck = async () => {
+    try {
+      setSaving(true);
+      const response = await fetch("/api/decks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: deckTitle || "Untitled Deck",
+          topic: deckTitle || "General",
+          flashcards,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to save deck");
+      }
+      alert("🎉 Deck saved successfully!");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error(error);
+      alert("❌ Failed to save deck");
+    } finally {
+      setSaving(false);
     }
-
-    alert("🎉 Deck saved successfully!");
-
-    router.push("/dashboard");
-  } catch (error) {
-    console.error(error);
-    alert("❌ Failed to save deck");
-  } finally {
-    setSaving(false);
-  }
-};
-
+  };
 
   const progress =
     flashcards.length === 0
@@ -87,44 +98,36 @@ topic: deckTitle || "General",
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-zinc-950 to-purple-950 text-white">
       <div className="max-w-7xl mx-auto px-6 py-12">
+        
         {/* Header */}
         <div className="mb-12">
-
           <div className="mb-8 flex items-center justify-between">
-  <Link
-    href="/dashboard"
-    className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2 text-sm font-medium text-zinc-300 transition-all hover:border-purple-500 hover:bg-zinc-800 hover:text-white"
-  >
-    <ArrowLeft size={18} />
-    Back to Dashboard
-  </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/60 px-4 py-2 text-sm font-medium text-zinc-300 transition-all hover:border-purple-500 hover:bg-zinc-800 hover:text-white"
+            >
+              <ArrowLeft size={18} />
+              Back to Dashboard
+            </Link>
 
-  <button
-    onClick={handleSaveDeck}
-    disabled={saving || flashcards.length === 0}
-    className="group inline-flex items-center gap-3 rounded-xl
-    bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-600
-    px-6 py-3 font-semibold shadow-lg shadow-purple-900/30
-    transition-all duration-300
-    hover:scale-105 hover:shadow-purple-700/50
-    disabled:cursor-not-allowed disabled:opacity-60"
-  >
-    <Save
-      size={18}
-      className="transition-transform duration-300 group-hover:rotate-12"
-    />
+            <button
+              onClick={handleSaveDeck}
+              disabled={saving || flashcards.length === 0}
+              className="group inline-flex items-center gap-3 rounded-xl bg-gradient-to-r from-purple-600 via-violet-600 to-fuchsia-600 px-6 py-3 font-semibold shadow-lg shadow-purple-900/30 transition-all duration-300 hover:scale-105 hover:shadow-purple-700/50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Save
+                size={18}
+                className="transition-transform duration-300 group-hover:rotate-12"
+              />
+              {saving ? "Saving..." : "Save Deck"}
+            </button>
+          </div>
 
-    {saving ? "Saving..." : "Save Deck"}
-  </button>
-</div>
           <h1 className="text-5xl font-bold">AI Flashcards</h1>
-
           <p className="text-zinc-400 mt-4 text-lg">
             Learn anything faster with interactive AI generated flashcards.
           </p>
         </div>
-
-        
 
         {/* Info Cards */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -133,7 +136,6 @@ topic: deckTitle || "General",
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
               Topic
             </p>
-
             <h2 className="text-3xl font-bold mt-3 capitalize text-purple-400">
               {deckTitle}
             </h2>
@@ -144,7 +146,6 @@ topic: deckTitle || "General",
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
               Total Cards
             </p>
-
             <h2 className="text-3xl font-bold mt-3">
               {flashcards.length}
             </h2>
@@ -155,31 +156,18 @@ topic: deckTitle || "General",
             <p className="uppercase tracking-widest text-zinc-400 text-sm">
               Study Progress
             </p>
-
             <div className="mt-5 h-3 bg-zinc-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-purple-500 transition-all duration-500"
-                style={{
-                  width: `${progress}%`,
-                }}
+                style={{ width: `${progress}%` }}
               />
             </div>
-
             <h2 className="text-2xl font-bold mt-5">
               {reviewedCards.length} / {flashcards.length}
             </h2>
-
-            <p className="text-zinc-400 mt-2">
-              {progress}% Complete
-            </p>
+            <p className="text-zinc-400 mt-2">{progress}% Complete</p>
           </div>
         </div>
-
-
- 
-</div>
-
-
 
         {/* Flashcards */}
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -191,10 +179,7 @@ topic: deckTitle || "General",
               flipped={flippedCard === index}
               reviewed={reviewedCards.includes(index)}
               onFlip={() => {
-                setFlippedCard(
-                  flippedCard === index ? null : index
-                );
-
+                setFlippedCard(flippedCard === index ? null : index);
                 if (!reviewedCards.includes(index)) {
                   setReviewedCards((prev) => [...prev, index]);
                 }
@@ -202,7 +187,8 @@ topic: deckTitle || "General",
             />
           ))}
         </div>
-      
+
+      </div>
     </main>
   );
 }
