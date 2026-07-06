@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isClerkServerConfigured } from "@/lib/clerk";
 import { supabaseServer } from "@/lib/supabase-server";
 
 /* ===========================
@@ -11,6 +12,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {
@@ -57,6 +65,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {
@@ -106,6 +121,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {

@@ -3,8 +3,10 @@
 
 import { UserButton } from "@clerk/nextjs";
 import ThemeToggle from "@/components/shared/ThemeToggle";
+import { isClerkPublishableKeyConfigured } from "@/lib/clerk";
 
 export default function DashboardHeader() {
+  const isClerkConfigured = isClerkPublishableKeyConfigured();
   return (
     <header className="border-b border-zinc-800 bg-black/70 backdrop-blur-xl sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -17,13 +19,17 @@ export default function DashboardHeader() {
 
           <ThemeToggle />
 
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-10 h-10",
-              },
-            }}
-          />
+          {isClerkConfigured ? (
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: "w-10 h-10",
+                },
+              }}
+            />
+          ) : (
+            <span className="text-sm text-zinc-500">Auth unavailable</span>
+          )}
 
         </div>
 

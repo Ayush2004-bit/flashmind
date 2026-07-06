@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import { Toaster } from "sonner";
+import { isClerkPublishableKeyConfigured } from "@/lib/clerk";
 
 export const metadata: Metadata = {
   title: "FlashMind",
@@ -16,25 +17,29 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body>
-          <ThemeProvider>
+  const isClerkConfigured = isClerkPublishableKeyConfigured();
 
-            {children}
+  const content = (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider>
+          {children}
 
-            <Toaster
-              position="top-right"
-              richColors
-              closeButton
-              duration={2500}
-            />
-
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+          <Toaster
+            position="top-right"
+            richColors
+            closeButton
+            duration={2500}
+          />
+        </ThemeProvider>
+      </body>
+    </html>
   );
+
+  if (!isClerkConfigured) {
+    return content;
+  }
+
+  return <ClerkProvider>{content}</ClerkProvider>;
 }
 

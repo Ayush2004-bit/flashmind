@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { isClerkServerConfigured } from "@/lib/clerk";
 import { supabaseServer } from "@/lib/supabase-server";
 
 /* ===========================
@@ -8,6 +9,13 @@ import { supabaseServer } from "@/lib/supabase-server";
 
 export async function GET() {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {
@@ -50,6 +58,13 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     // Clerk Authentication
     const { userId } = await auth();
 

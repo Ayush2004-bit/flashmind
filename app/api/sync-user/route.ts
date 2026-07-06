@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { isClerkServerConfigured } from "@/lib/clerk";
 import { supabaseServer } from "@/lib/supabase-server";
 
 export async function POST() {
   try {
+    if (!isClerkServerConfigured()) {
+      return NextResponse.json(
+        { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
     // 1. Logged in user
     const { userId } = await auth();
 

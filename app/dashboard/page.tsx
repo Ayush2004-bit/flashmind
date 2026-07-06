@@ -5,13 +5,26 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import UploadCards from "@/components/dashboard/UploadCards";
 import TopicGenerator from "@/components/dashboard/TopicGenerator";
 import RecentSets from "@/components/dashboard/RecentSets";
+import { isClerkServerConfigured } from "@/lib/clerk";
 import { BrainCircuit } from "lucide-react";
 
-
 export default async function DashboardPage() {
-const { userId } = await auth();
+  if (!isClerkServerConfigured()) {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+        <div className="max-w-md rounded-xl border border-zinc-800 bg-zinc-950/80 p-8 text-center">
+          <h1 className="text-2xl font-semibold">Authentication is currently unavailable</h1>
+          <p className="mt-2 text-sm text-zinc-400">
+            The deployment environment is missing the required Clerk credentials.
+          </p>
+        </div>
+      </main>
+    );
+  }
 
-if (!userId) {
+  const { userId } = await auth();
+
+  if (!userId) {
     redirect("/sign-in");
   }
 
