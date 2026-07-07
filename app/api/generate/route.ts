@@ -28,14 +28,26 @@ export async function POST(req: Request) {
         );
       }
 
-      const transcript = await getTranscript(videoId);
-      deckTitle = await getVideoTitle(videoId);
+      try {
+        const transcript = await getTranscript(videoId);
+        deckTitle = await getVideoTitle(videoId);
 
-      finalTopic = `
+        finalTopic = `
 Generate flashcards from the following YouTube transcript.
 
 ${transcript}
 `;
+      } catch (error) {
+        console.error("YouTube transcript error:", error);
+
+        return NextResponse.json(
+          {
+            error:
+              "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.",
+          },
+          { status: 502 }
+        );
+      }
     }
 
     // ===========================

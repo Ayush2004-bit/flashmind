@@ -7,15 +7,21 @@ import { YoutubeTranscript } from "youtube-transcript";
 export function extractVideoId(url: string): string | null {
   try {
     const parsed = new URL(url);
+    const hostname = parsed.hostname.replace(/^www\./, "");
+    const pathname = parsed.pathname;
 
-    // https://www.youtube.com/watch?v=xxxx
-    if (parsed.hostname.includes("youtube.com")) {
-      return parsed.searchParams.get("v");
+    if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+      if (pathname.startsWith("/watch")) {
+        return parsed.searchParams.get("v");
+      }
+
+      if (pathname.startsWith("/shorts/") || pathname.startsWith("/embed/") || pathname.startsWith("/live/") || pathname.startsWith("/v/")) {
+        return pathname.split("/")[2] || null;
+      }
     }
 
-    // https://youtu.be/xxxx
-    if (parsed.hostname.includes("youtu.be")) {
-      return parsed.pathname.replace("/", "");
+    if (hostname === "youtu.be") {
+      return pathname.replace("/", "");
     }
 
     return null;

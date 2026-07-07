@@ -19,7 +19,7 @@ export default function YouTubeUploader() {
 
     // Validate YouTube URL
     const youtubeRegex =
-      /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/).+/;
+      /^(https?:\/\/)?(www\.)?(m\.)?(youtube\.com\/(watch\?v=|shorts\/|embed\/|live\/|v\/)|youtu\.be\/).+/;
 
     if (!youtubeRegex.test(url)) {
       toast.error("Invalid YouTube URL!");

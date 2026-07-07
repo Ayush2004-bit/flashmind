@@ -1,7 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 
+const googleApiKey = process.env.GOOGLE_API_KEY;
+
+if (!googleApiKey) {
+  throw new Error("Missing GOOGLE_API_KEY environment variable");
+}
+
 const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_API_KEY!,
+  apiKey: googleApiKey,
 });
 
 export default ai;
