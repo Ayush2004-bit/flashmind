@@ -12,6 +12,13 @@ export async function POST() {
       );
     }
 
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: "Supabase is not configured" },
+        { status: 503 }
+      );
+    }
+
     // 1. Logged in user
     const { userId } = await auth();
 

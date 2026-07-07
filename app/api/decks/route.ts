@@ -16,6 +16,13 @@ export async function GET() {
       );
     }
 
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: "Supabase is not configured" },
+        { status: 503 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {
@@ -61,6 +68,13 @@ export async function POST(req: Request) {
     if (!isClerkServerConfigured()) {
       return NextResponse.json(
         { error: "Authentication is not configured" },
+        { status: 503 }
+      );
+    }
+
+    if (!supabaseServer) {
+      return NextResponse.json(
+        { error: "Supabase is not configured" },
         { status: 503 }
       );
     }
