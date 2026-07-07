@@ -1,16 +1,34 @@
 import { GoogleGenAI } from "@google/genai";
 
-const googleApiKey = process.env.GOOGLE_API_KEY;
+let aiClient: GoogleGenAI | null = null;
 
-if (!googleApiKey) {
-  throw new Error("Missing GOOGLE_API_KEY environment variable");
+function getAiClient() {
+  if (aiClient) {
+    return aiClient;
+  }
+
+  const googleApiKey = process.env.GOOGLE_API_KEY;
+
+  if (!googleApiKey) {
+    return null;
+  }
+
+  aiClient = new GoogleGenAI({
+    apiKey: googleApiKey,
+  });
+
+  return aiClient;
 }
 
-const ai = new GoogleGenAI({
-  apiKey: googleApiKey,
-});
+function ensureAiClient(): GoogleGenAI {
+  const client = getAiClient();
 
-export default ai;
+  if (!client) {
+    throw new Error("Missing GOOGLE_API_KEY environment variable");
+  }
+
+  return client;
+}
 
 /* ===========================
    Clean Gemini JSON
@@ -70,6 +88,8 @@ No explanation.
 Only JSON.
 `;
 
+  const ai = ensureAiClient();
+
   const response = await ai.models.generateContent({
     model: process.env.GEMINI_MODEL!,
     contents: prompt,
@@ -117,6 +137,8 @@ No markdown.
 No explanation.
 Only JSON.
 `;
+
+  const ai = ensureAiClient();
 
   const response = await ai.models.generateContent({
     model: process.env.GEMINI_MODEL!,
