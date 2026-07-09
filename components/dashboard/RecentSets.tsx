@@ -36,7 +36,30 @@ export default function RecentSets() {
         const res = await fetch("/api/decks");
 
         if (!res.ok) {
-          throw new Error("Failed to fetch decks");
+          let body: any = null;
+
+          try {
+            body = await res.json();
+          } catch (_) {
+            /* ignore json parse errors */
+          }
+
+          // If the user is not authenticated, redirect to sign-in.
+          if (res.status === 401) {
+            const signInUrl =
+              (process.env.NEXT_PUBLIC_CLERK_SIGN_IN_URL as string) ||
+              "/sign-in";
+
+            if (typeof window !== "undefined") {
+              window.location.href = signInUrl;
+            }
+
+            return;
+          }
+
+          console.error("Failed to fetch decks", res.status, body);
+          setDecks([]);
+          return;
         }
 
         const data = await res.json();
@@ -44,6 +67,7 @@ export default function RecentSets() {
         setDecks(data);
       } catch (err) {
         console.error(err);
+        setDecks([]);
       } finally {
         setLoading(false);
       }
