@@ -11,6 +11,9 @@
   "dependencies": {
     "@clerk/nextjs": "^7.5.9",
     "@google/genai": "^2.10.0",
+    "ffmpeg-static": "^5.1.0",
+    "form-data": "^4.0.0",
+    "ytdl-core": "^4.11.0",
     "@hookform/resolvers": "^5.4.0",
     "@supabase/supabase-js": "^2.108.2",
     "class-variance-authority": "^0.7.1",
