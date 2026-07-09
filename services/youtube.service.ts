@@ -6,17 +6,22 @@ import { YoutubeTranscript } from "youtube-transcript";
 
 export function extractVideoId(url: string): string | null {
   try {
+    // Try URL parsing first
     const parsed = new URL(url);
-    const hostname = parsed.hostname.replace(/^www\./, "");
+    const hostname = parsed.hostname.replace(/^www\./, "").toLowerCase();
     const pathname = parsed.pathname;
 
-    if (hostname === "youtube.com" || hostname === "m.youtube.com") {
-      if (pathname.startsWith("/watch")) {
+    if (hostname.includes("youtube.com") || hostname === "m.youtube.com") {
+      // watch?v=VIDEOID
+      if (parsed.searchParams.get("v")) {
         return parsed.searchParams.get("v");
       }
 
-      if (pathname.startsWith("/shorts/") || pathname.startsWith("/embed/") || pathname.startsWith("/live/") || pathname.startsWith("/v/")) {
-        return pathname.split("/")[2] || null;
+      // /shorts/VIDEOID or /embed/VIDEOID or /v/VIDEOID
+      const parts = pathname.split("/").filter(Boolean);
+      if (parts.length >= 2) {
+        const possible = parts[1] || parts[0];
+        if (possible && possible.length >= 5) return possible;
       }
     }
 
@@ -24,7 +29,9 @@ export function extractVideoId(url: string): string | null {
       return pathname.replace("/", "");
     }
 
-    return null;
+    // Fallback: regex match for 11-char YouTube id
+    const match = url.match(/[a-zA-Z0-9_-]{11}/);
+    return match ? match[0] : null;
   } catch {
     return null;
   }
@@ -35,11 +42,34 @@ export function extractVideoId(url: string): string | null {
 =========================== */
 
 export async function getTranscript(videoId: string) {
-  const transcript = await YoutubeTranscript.fetchTranscript(videoId);
+  try {
+    // Primary attempt
+    let transcript: any[] | null = null;
 
-  return transcript
-    .map((item) => item.text)
-    .join(" ");
+    try {
+      transcript = await YoutubeTranscript.fetchTranscript(videoId);
+    } catch (err) {
+      console.warn("youtube.service: primary fetchTranscript failed", err);
+    }
+
+    // Fallback: try forcing English (some videos only expose auto-captions under a language)
+    if ((!transcript || transcript.length === 0) && (YoutubeTranscript as any).fetchTranscript) {
+      try {
+        transcript = await (YoutubeTranscript as any).fetchTranscript(videoId, { lang: "en" });
+      } catch (err) {
+        console.warn("youtube.service: fallback fetchTranscript(lang=en) failed", err);
+      }
+    }
+
+    if (!transcript || transcript.length === 0) {
+      throw new Error("No transcript available for this video");
+    }
+
+    return transcript.map((item) => item.text).join(" ");
+  } catch (err: any) {
+    console.error("getTranscript error for", videoId, err?.message || err);
+    throw err;
+  }
 }
 
 export async function getVideoTitle(videoId: string) {
