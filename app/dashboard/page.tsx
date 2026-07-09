@@ -17,6 +17,18 @@ export default async function DashboardPage() {
           <p className="mt-2 text-sm text-zinc-400">
             The deployment environment is missing the required Clerk credentials.
           </p>
+
+          <div className="mt-4 text-left text-sm text-zinc-400">
+            <p className="mb-2">Required environment variables:</p>
+            <ul className="list-disc ml-5">
+              <li>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</li>
+              <li>CLERK_SECRET_KEY</li>
+            </ul>
+
+            <p className="mt-3">
+              Set these in your deployment platform (Vercel, Netlify, Render) under project environment variables and redeploy. See the Clerk docs for setup details.
+            </p>
+          </div>
         </div>
       </main>
     );
