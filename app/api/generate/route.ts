@@ -5,7 +5,6 @@ import {
   getTranscript,
   getVideoTitle,
 } from "@/services/youtube.service";
-import { transcribeYoutubeWithWhisper } from "@/services/transcription.service";
 
 export async function POST(req: Request) {
   try {
@@ -29,7 +28,6 @@ export async function POST(req: Request) {
         );
       }
 
-      // First try to get the transcript via YouTube captions
       try {
         const transcript = await getTranscript(videoId);
         deckTitle = await getVideoTitle(videoId);
@@ -40,47 +38,23 @@ Generate flashcards from the following YouTube transcript.
 ${transcript}
 `;
       } catch (error) {
-        console.warn("YouTube caption transcript failed:", error?.message || error);
+        console.error("YouTube transcript error:", error);
 
-        // If we have an OpenAI key configured, attempt an audio transcription fallback
-        if (process.env.OPENAI_API_KEY) {
-          try {
-            const transcript = await transcribeYoutubeWithWhisper(videoId);
-            deckTitle = await getVideoTitle(videoId);
+        // Return a more specific message when possible
+        const message =
+          (error as any)?.message ||
+          "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.";
 
-            finalTopic = `
-Generate flashcards from the following YouTube transcript (auto-transcribed).
-
-${transcript}
-`;
-          } catch (sttError) {
-            console.error("Audio transcription fallback failed:", sttError);
-
-            const message = (sttError as any)?.message || "Audio transcription failed";
-
-            return NextResponse.json(
-              {
-                error:
-                  "Unable to transcribe video audio. Please try a different video or configure an OPENAI_API_KEY for server-side transcription.",
-                details: process.env.NODE_ENV !== "production" ? message : undefined,
-              },
-              { status: 502 }
-            );
-          }
-        } else {
-          const message = (error as any)?.message || "Unable to fetch the YouTube transcript";
-
-          return NextResponse.json(
-            {
-              error:
-                message.startsWith("No transcript")
-                  ? "No subtitles/transcript found for this video. To extract from any video enable server-side transcription by setting OPENAI_API_KEY."
-                  : "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.",
-              details: process.env.NODE_ENV !== "production" ? message : undefined,
-            },
-            { status: 502 }
-          );
-        }
+        return NextResponse.json(
+          {
+            error:
+              message.startsWith("No transcript")
+                ? "No subtitles/transcript found for this video. Please enable captions on YouTube or try a different video."
+                : "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.",
+            details: process.env.NODE_ENV !== "production" ? message : undefined,
+          },
+          { status: 502 }
+        );
       }
     }
 
