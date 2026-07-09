@@ -40,18 +40,10 @@ ${transcript}
       } catch (error) {
         console.error("YouTube transcript error:", error);
 
-        // Return a more specific message when possible
-        const message =
-          (error as any)?.message ||
-          "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.";
-
         return NextResponse.json(
           {
             error:
-              message.startsWith("No transcript")
-                ? "No subtitles/transcript found for this video. Please enable captions on YouTube or try a different video."
-                : "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.",
-            details: process.env.NODE_ENV !== "production" ? message : undefined,
+              "Unable to fetch the YouTube transcript. Please verify the URL and make sure subtitles are available.",
           },
           { status: 502 }
         );
